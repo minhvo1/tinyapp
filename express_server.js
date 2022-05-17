@@ -51,13 +51,23 @@ app.get("/u/:shortURL", (req, res) => {
   res.redirect(longURL); // redirect to long URL page
 });
 
+app.post("/u/:shortURL", (req, res) => {
+  const newLongURL = req.body.longURL;
+  console.log(req.params);
+  urlDatabase[req.params.shortURL] = newLongURL;
+  res.redirect("/urls");
+});
+
 app.get("/urls/:shortURL", (req, res) => {
   const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };
   res.render("urls_show", templateVars);
 });
 
+app.post("/urls/:shortURL/edit", (req, res) => {
+  res.redirect(`/urls/${req.params.shortURL}`);
+})
+
 app.post("/urls/:shortURL/delete", (req, res) => {
-  console.log(req.body, req.params);
   delete urlDatabase[req.params.shortURL]
   res.redirect("/urls/");
 })
