@@ -39,6 +39,7 @@ function checkEmail(email, userDatabase) {
   return false 
 }
 
+
 app.set('view engine', 'ejs');
 
 
@@ -61,9 +62,22 @@ app.get("/login", (req, res) => {
   res.render("urls_login", templateVars);
 })
 
-// Login when username is inputted
+// Login when email address and password is inputted
 app.post("/login", (req, res) => {
-  //res.cookie("username", req.body.username);
+  console.log(req.body)
+  if (!checkEmail(req.body.email, users)) {
+    return res.status(403).send("Email address not found.");
+  }
+  let userID = "";
+  for (const id in users) {
+    if (users[id].email === req.body.email) {
+      userID = id;
+      if (users[id].password !== req.body.password) {
+        return res.status(403).send("Email address and password do not match.");
+      }
+    }
+  }
+  res.cookie("user_id", userID);
   res.redirect('/urls');
 })
 
@@ -111,6 +125,7 @@ app.post("/register", (req, res) => {
   res.redirect("/urls");
 })
 
+// Add a new long URL to be shortened
 app.get("/urls/new", (req, res) => {
   const templateVars = { user: users[req.cookies["user_id"]] };
   res.render("urls_new", templateVars);
