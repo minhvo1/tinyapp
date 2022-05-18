@@ -27,9 +27,15 @@ const urlDatabase = {
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieParser());
 
-
+// Login when username is inputted
 app.post("/login", (req, res) => {
   res.cookie("username", req.body.username);
+  res.redirect('/urls');
+})
+
+// Logout
+app.post("/logout", (req, res) => {
+  res.clearCookie("username");
   res.redirect('/urls');
 })
 
@@ -41,7 +47,6 @@ app.get("/", (req, res) => {
 // Page for all current URLs in data base
 app.get("/urls", (req, res) => {
   const templateVars = { username: req.cookies["username"],urls: urlDatabase };
-  console.log(templateVars)
   res.render("urls_index", templateVars);
 });
 
