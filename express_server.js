@@ -64,7 +64,6 @@ app.get("/login", (req, res) => {
 
 // Login when email address and password is inputted
 app.post("/login", (req, res) => {
-  console.log(req.body)
   if (!checkEmail(req.body.email, users)) {
     return res.status(403).send("Email address not found.");
   }
@@ -95,6 +94,10 @@ app.get("/urls", (req, res) => {
 
 //Generate random short URL strings after submitting a long URL
 app.post("/urls", (req, res) => {
+  if (!req.cookies["user_id"]) {
+    res.status(401).send('UNAUTHORIZED REQUEST!');
+    return;
+  }
   const shortURL = generateRandomString();
   urlDatabase[shortURL] = req.body.longURL; // Set the long URL input from form to the corresponding short URL generate in database
   res.redirect(`/urls/${shortURL}`);  // Redirect to /urls/:shortURL
