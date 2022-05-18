@@ -4,6 +4,20 @@ const cookieParser = require("cookie-parser")
 const app = express();
 const PORT = 8080; // default port 8080
 
+//User Database
+const users = { 
+  "userRandomID": {
+    id: "userRandomID", 
+    email: "user@example.com", 
+    password: "purple-monkey-dinosaur"
+  },
+ "user2RandomID": {
+    id: "user2RandomID", 
+    email: "user2@example.com", 
+    password: "dishwasher-funk"
+  }
+}
+
 //Generate random 6-characters string
 function generateRandomString() {
   const chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -15,7 +29,6 @@ function generateRandomString() {
   return randomString;
 }
 
-
 app.set('view engine', 'ejs');
 
 
@@ -26,6 +39,11 @@ const urlDatabase = {
 
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieParser());
+
+// Landing page
+app.get("/", (req, res) => {
+  res.send("Hello!");
+});
 
 // Login when username is inputted
 app.post("/login", (req, res) => {
@@ -39,26 +57,35 @@ app.post("/logout", (req, res) => {
   res.redirect('/urls');
 })
 
-// Landing page
-app.get("/", (req, res) => {
-  res.send("Hello!");
-});
-
 // Page for all current URLs in data base
 app.get("/urls", (req, res) => {
   const templateVars = { username: req.cookies["username"],urls: urlDatabase };
   res.render("urls_index", templateVars);
 });
 
+//Generate random short URL strings after submitting a long URL
 app.post("/urls", (req, res) => {
   const shortURL = generateRandomString();
   urlDatabase[shortURL] = req.body.longURL; // Set the long URL input from form to the corresponding short URL generate in database
   res.redirect(`/urls/${shortURL}`);  // Redirect to /urls/:shortURL
 });
 
+// User registration page
 app.get("/register", (req, res) => {
   const templateVars = { username: req.cookies["username"],urls: urlDatabase };
   res.render("urls_register", templateVars);
+})
+
+//Post submitted email and password to user database
+app.post("/register", (req, res) => {
+  const userID = generateRandomString();
+  users[userID] = {
+    'id': userID,
+    'email': req.body.email,
+    'password': req.body.password
+  };
+  res.cookie("user_id", userID);
+  res.redirect("/urls")
 })
 
 app.get("/urls/new", (req, res) => {
