@@ -16,7 +16,7 @@
         <button type="submit" class="btn btn-primary">Login</button>
       </form>
     <% } else { %>
-      Welcome, <%= username %>  
+      <div class="nav-item positon-relative">Logged in as <%= username %> </div>
       <form method="POST" action="/logout">
         <button type="submit" class="btn btn-primary">Logout</button>
       </form>
