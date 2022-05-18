@@ -148,9 +148,14 @@ app.get("/urls/new", (req, res) => {
   res.render("urls_new", templateVars);
 });
 
+// Redirect to long URL page
 app.get("/u/:shortURL", (req, res) => {
+  // Check if short URL id is valid in database
+  if (urlDatabase[req.params.shortURL] === undefined) {
+    return res.status(404).send("Cannot find the requested short URL");
+  }
   const longURL = urlDatabase[req.params.shortURL].longURL;
-  res.redirect(longURL); // redirect to long URL page
+  res.redirect(longURL);
 });
 
 app.post("/u/:shortURL", (req, res) => {
