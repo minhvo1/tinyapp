@@ -29,6 +29,16 @@ function generateRandomString() {
   return randomString;
 }
 
+// Check function to verify if email address is already registered
+function checkEmail(email, userDatabase) {
+  for (const id in userDatabase) {
+    if (userDatabase[id].email === email) {
+      return true; //return true if email already in database
+    }
+  }
+  return false 
+}
+
 app.set('view engine', 'ejs');
 
 
@@ -59,7 +69,7 @@ app.post("/logout", (req, res) => {
 
 // Page for all current URLs in data base
 app.get("/urls", (req, res) => {
-  const templateVars = { username: req.cookies["username"],urls: urlDatabase };
+  const templateVars = { user: users[req.cookies["user_id"]],urls: urlDatabase };
   res.render("urls_index", templateVars);
 });
 
@@ -72,24 +82,33 @@ app.post("/urls", (req, res) => {
 
 // User registration page
 app.get("/register", (req, res) => {
-  const templateVars = { username: req.cookies["username"],urls: urlDatabase };
+  const templateVars = { user: users[req.cookies["user_id"]],urls: urlDatabase };
   res.render("urls_register", templateVars);
 })
 
 //Post submitted email and password to user database
 app.post("/register", (req, res) => {
+  if (req.body.email === undefined) {
+    res.statusMessage = "Email address is empty.";
+    return res.status(400).end();
+  }
+  if (checkEmail(req.body.email, users)) {
+    res.statusMessage = "Email address is already in use.";
+    return res.status(400).end();
+  }
   const userID = generateRandomString();
+  
   users[userID] = {
     'id': userID,
     'email': req.body.email,
     'password': req.body.password
   };
   res.cookie("user_id", userID);
-  res.redirect("/urls")
+  res.redirect("/urls");
 })
 
 app.get("/urls/new", (req, res) => {
-  const templateVars = { username: req.cookies["username"] };
+  const templateVars = { user: users[req.cookies["user_id"]] };
   res.render("urls_new", templateVars);
 });
 
@@ -105,7 +124,7 @@ app.post("/u/:shortURL", (req, res) => {
 });
 
 app.get("/urls/:shortURL", (req, res) => {
-  const templateVars = { username: req.cookies["username"], shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };
+  const templateVars = { user: users[req.cookies["user_id"]], shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };
   res.render("urls_show", templateVars);
 });
 
