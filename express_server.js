@@ -52,18 +52,24 @@ app.use(cookieParser());
 
 // Landing page
 app.get("/", (req, res) => {
-  res.send("Hello!");
+  res.redirect("/urls");
 });
+
+// Get login page
+app.get("/login", (req, res) => {
+  const templateVars = { user: users[req.cookies["user_id"]],urls: urlDatabase };
+  res.render("urls_login", templateVars);
+})
 
 // Login when username is inputted
 app.post("/login", (req, res) => {
-  res.cookie("username", req.body.username);
+  //res.cookie("username", req.body.username);
   res.redirect('/urls');
 })
 
 // Logout
 app.post("/logout", (req, res) => {
-  res.clearCookie("username");
+  res.clearCookie("user_id");
   res.redirect('/urls');
 })
 
@@ -88,13 +94,11 @@ app.get("/register", (req, res) => {
 
 //Post submitted email and password to user database
 app.post("/register", (req, res) => {
-  if (req.body.email === undefined) {
-    res.statusMessage = "Email address is empty.";
-    return res.status(400).end();
+  if (req.body.email === "") {
+    return res.status(400).send("Email address is empty.");
   }
   if (checkEmail(req.body.email, users)) {
-    res.statusMessage = "Email address is already in use.";
-    return res.status(400).end();
+    return res.status(400).send("Email address is already in use.");
   }
   const userID = generateRandomString();
   
