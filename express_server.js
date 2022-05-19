@@ -1,6 +1,6 @@
 const express = require("express");
 const bodyParser = require("body-parser");
-//const cookieParser = require("cookie-parser");
+
 const cookieSession = require("cookie-session");
 const bcrypt = require('bcryptjs');
 const app = express();
@@ -38,7 +38,7 @@ const urlDatabase = {
 };
 
 // Generate random 6-characters string
-function generateRandomString() {
+const generateRandomString = function() {
   const chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
   const length = 6;
   let randomString = '';
@@ -49,7 +49,7 @@ function generateRandomString() {
 }
 
 // Check function to verify if email address is already registered
-function checkEmail(email, userDatabase) {
+const checkEmail = function(email, userDatabase) {
   for (const id in userDatabase) {
     if (userDatabase[id].email === email) {
       return true; //return true if email already in database
@@ -58,8 +58,18 @@ function checkEmail(email, userDatabase) {
   return false;
 };
 
+// Function to return user with specific email in database
+const getUserByEmail = function(email, database) {
+  for (const id in database) {
+    if (database[id].email === email) {
+      return database[id].id; //return id email matches
+    }
+  }
+  return null; // if not found return null
+};
+
 // Function to return URLs from database that belongs to a user
-function urlsForUser(id, userDatabase) {
+const urlsForUser = function(id, userDatabase) {
   let urls = [];
   for (const shortURL in userDatabase) {
     if (id === userDatabase[shortURL].userID) {
@@ -69,10 +79,17 @@ function urlsForUser(id, userDatabase) {
   return urls;
 };
 
+// Function to check user ID cookies to verify whether user logged in
+const checkLoginCookies = function(cookie, res) {
+ if (!cookie) {
+  return res.status(401).send('Unauthorized Request. Please log in.');  // Return unauthorized request if user is not logged in
+ }
+}
+
+
 app.set('view engine', 'ejs');
 // Set up middlewares
 app.use(bodyParser.urlencoded({extended: true}));
-//app.use(cookieParser());
 app.use(cookieSession({
   name: 'session',
   secret: 'secret',
@@ -94,14 +111,14 @@ app.get("/login", (req, res) => {
 // Login when email address and password is inputted
 app.post("/login", (req, res) => {
   if (!checkEmail(req.body.email, users)) {
-    return res.status(403).send("Email address not found.");
+    return res.status(400).send("Email address not found.");
   }
   let userID = "";
   for (const id in users) {
     if (users[id].email === req.body.email) {
       userID = id;
       if (!bcrypt.compareSync(req.body.password, users[id].password)) {
-        return res.status(403).send("Email address and password do not match.");
+        return res.status(401).send("Email address and password do not match.");
       }
     }
   }
@@ -126,10 +143,7 @@ app.get("/urls", (req, res) => {
 
 // Generate random short URL strings after submitting a long URL
 app.post("/urls", (req, res) => {
-  if (!req.session.user_id) {
-    res.status(401).send('Unauthorized Request. Please log in.');
-    return;
-  }
+  checkLoginCookies(req.session.user_id, res);
   const shortURL = generateRandomString();
   urlDatabase[shortURL] = {};
   urlDatabase[shortURL].longURL = req.body.longURL; // Set the long URL input from form to the corresponding short URL generate in database
@@ -166,9 +180,7 @@ app.post("/register", (req, res) => {
 
 // Add a new long URL to be shortened
 app.get("/urls/new", (req, res) => {
-  if (!req.session.user_id) {
-    return res.status(401).send('Unauthorized Request. Please log in.');
-  }
+  checkLoginCookies(req.session.user_id, res);
   const templateVars = { user: users[req.session.user_id] };
   res.render("urls_new", templateVars);
 });
@@ -192,9 +204,7 @@ app.post("/u/:shortURL", (req, res) => {
 
 // Showing individual URL and edit function
 app.get("/urls/:shortURL", (req, res) => {
-  if (!req.session.user_id) {
-    return res.status(401).send('Unauthorized Request. Please log in.');
-  }
+  checkLoginCookies(req.session.user_id, res);
   let validURLs = urlsForUser(req.session.user_id, urlDatabase);
   if (!validURLs.includes(req.params.shortURL)) {
     return res.status(401).send('The requested URL does not exist.'); // Error if the requested URL does not exist for user
@@ -205,19 +215,13 @@ app.get("/urls/:shortURL", (req, res) => {
 
 // URL edit function
 app.post("/urls/:shortURL/edit", (req, res) => {
-  if (!req.session.user_id) {
-    res.status(401).send('Unauthorized Request. Please log in.');
-    return;
-  }
+  checkLoginCookies(req.session.user_id, res);
   res.redirect(`/urls/${req.params.shortURL}`);
 })
 
 // URL delete function
 app.post("/urls/:shortURL/delete", (req, res) => {
-  if (!req.session.user_id) {
-    res.status(401).send('Unauthorized Request.');
-    return;
-  }
+  checkLoginCookies(req.session.user_id, res);
   delete urlDatabase[req.params.shortURL];
   res.redirect("/urls/");
 })
