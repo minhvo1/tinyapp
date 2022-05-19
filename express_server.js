@@ -7,34 +7,34 @@ const app = express();
 const PORT = 8080; // Default port 8080
 
 //User Database
-const users = { 
+const users = {
   "userRandomID": {
-    id: "userRandomID", 
-    email: "user@example.com", 
+    id: "userRandomID",
+    email: "user@example.com",
     password: "1"
   },
- "user2RandomID": {
-    id: "user2RandomID", 
-    email: "user2@example.com", 
+  "user2RandomID": {
+    id: "user2RandomID",
+    email: "user2@example.com",
     password: "dishwasher-funk"
   }
 };
 
 // Hash all current passwords in existing database
 for (const user in users) {
-  users[user].password = bcrypt.hashSync(users[user].password, 10)
+  users[user].password = bcrypt.hashSync(users[user].password, 10);
 }
 
 // New URL Database
 const urlDatabase = {
   b6UTxQ: {
-        longURL: "https://www.tsn.ca",
-        userID: "aJ48lW"
-    },
-    i3BoGr: {
-        longURL: "https://www.google.ca",
-        userID: "aJ48lW"
-    }
+    longURL: "https://www.tsn.ca",
+    userID: "aJ48lW"
+  },
+  i3BoGr: {
+    longURL: "https://www.google.ca",
+    userID: "aJ48lW"
+  }
 };
 
 
@@ -59,7 +59,7 @@ app.get("/", (req, res) => {
 app.get("/login", (req, res) => {
   const templateVars = { user: users[req.session.user_id],urls: urlDatabase };
   res.render("urls_login", templateVars);
-})
+});
 
 // POST /login - Login when email address and password is inputted
 app.post("/login", (req, res) => {
@@ -77,13 +77,13 @@ app.post("/login", (req, res) => {
   }
   req.session.user_id = userID;
   res.redirect('/urls');
-})
+});
 
 // POST /logout - Logout; clears cookies
 app.post("/logout", (req, res) => {
   req.session = null;
   res.redirect('/');
-})
+});
 
 // GET /urls - Page for all current URLs in data base
 app.get("/urls", (req, res) => {
@@ -110,7 +110,7 @@ app.post("/urls", (req, res) => {
 app.get("/register", (req, res) => {
   const templateVars = { user: users[req.session.user_id],urls: urlDatabase };
   res.render("urls_register", templateVars);
-})
+});
 
 // POST /register - Submits email and password to user database
 app.post("/register", (req, res) => {
@@ -131,7 +131,7 @@ app.post("/register", (req, res) => {
   };
   req.session.user_id = userID;
   res.redirect("/urls");
-})
+});
 
 // GET /urls/new - Add a new long URL to be shortened
 app.get("/urls/new", (req, res) => {
@@ -179,7 +179,7 @@ app.post("/urls/:shortURL/edit", (req, res) => {
     return res.status(401).send('Unauthorized Request. Please log in.');  // Return unauthorized request if user is not logged in
   }
   res.redirect(`/urls/${req.params.shortURL}`);
-})
+});
 
 // POST /urls/:shortURL/delete - URL delete function
 app.post("/urls/:shortURL/delete", (req, res) => {
@@ -188,7 +188,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
   }
   delete urlDatabase[req.params.shortURL];
   res.redirect("/urls/");
-})
+});
 
 // Listen
 app.listen(PORT, () => {
