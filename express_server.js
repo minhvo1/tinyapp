@@ -47,7 +47,7 @@ app.use(cookieSession({
 }));
 
 
-// Landing page redirecting to /urls
+// GET / - Landing page redirecting to /urls
 app.get("/", (req, res) => {
   if (!req.session.user_id) {
     return res.redirect('/login');
@@ -55,13 +55,13 @@ app.get("/", (req, res) => {
   res.redirect("/urls");
 });
 
-// Get login page
+// GET /login - Login page
 app.get("/login", (req, res) => {
   const templateVars = { user: users[req.session.user_id],urls: urlDatabase };
   res.render("urls_login", templateVars);
 })
 
-// Login when email address and password is inputted
+// POST /login - Login when email address and password is inputted
 app.post("/login", (req, res) => {
   if (!checkEmail(req.body.email, users)) {
     return res.status(400).send("Email address not found.");
@@ -79,13 +79,13 @@ app.post("/login", (req, res) => {
   res.redirect('/urls');
 })
 
-// Logout; clears cookies
+// POST /logout - Logout; clears cookies
 app.post("/logout", (req, res) => {
   req.session = null;
   res.redirect('/');
 })
 
-// Page for all current URLs in data base
+// GET /urls - Page for all current URLs in data base
 app.get("/urls", (req, res) => {
   if (!req.session.user_id) {
     return res.status(401).send('Unauthorized Request. Please log in.');  // Return unauthorized request if user is not logged in
@@ -94,7 +94,7 @@ app.get("/urls", (req, res) => {
   res.render("urls_index", templateVars);
 });
 
-// Generate random short URL strings after submitting a long URL
+// POST /urls - Generate random short URL strings after submitting a long URL
 app.post("/urls", (req, res) => {
   if (!req.session.user_id) {
     return res.status(401).send('Unauthorized Request. Please log in.');  // Return unauthorized request if user is not logged in
@@ -106,13 +106,13 @@ app.post("/urls", (req, res) => {
   res.redirect(`/urls/${shortURL}`);  // Redirect to /urls/:shortURL
 });
 
-// User registration page
+// GET /register - User registration page
 app.get("/register", (req, res) => {
   const templateVars = { user: users[req.session.user_id],urls: urlDatabase };
   res.render("urls_register", templateVars);
 })
 
-// Post submitted email and password to user database
+// POST /register - Submits email and password to user database
 app.post("/register", (req, res) => {
   if (req.body.email === "") {
     return res.status(400).send("Email address is empty."); // Error if email is empty
@@ -133,7 +133,7 @@ app.post("/register", (req, res) => {
   res.redirect("/urls");
 })
 
-// Add a new long URL to be shortened
+// GET /urls/new - Add a new long URL to be shortened
 app.get("/urls/new", (req, res) => {
   if (!req.session.user_id) {
     return res.redirect("/login");
@@ -142,7 +142,7 @@ app.get("/urls/new", (req, res) => {
   res.render("urls_new", templateVars);
 });
 
-// Redirect to long URL page
+// GET /u/:shortURL - Redirect to long URL page
 app.get("/u/:shortURL", (req, res) => {
   // Check if short URL id is valid in database
   if (urlDatabase[req.params.shortURL] === undefined) {
@@ -152,14 +152,14 @@ app.get("/u/:shortURL", (req, res) => {
   res.redirect(longURL);
 });
 
-// After editing the long URL, redirects to long URL
+// POST /u/:shortURL - -After editing the long URL, redirects to long URL
 app.post("/u/:shortURL", (req, res) => {
   const newLongURL = req.body.longURL;
   urlDatabase[req.params.shortURL].longURL = newLongURL;
   res.redirect("/urls");
 });
 
-// Showing individual URL and edit function
+// GET /urls/:shortURL - Showing individual URL and edit function
 app.get("/urls/:shortURL", (req, res) => {
   if (!req.session.user_id) {
     return res.status(401).send('Unauthorized Request. Please log in.');  // Return unauthorized request if user is not logged in
@@ -173,7 +173,7 @@ app.get("/urls/:shortURL", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
-// URL edit function
+// POST /urls/:shortURL/edit - URL edit function
 app.post("/urls/:shortURL/edit", (req, res) => {
   if (!req.session.user_id) {
     return res.status(401).send('Unauthorized Request. Please log in.');  // Return unauthorized request if user is not logged in
@@ -181,7 +181,7 @@ app.post("/urls/:shortURL/edit", (req, res) => {
   res.redirect(`/urls/${req.params.shortURL}`);
 })
 
-// URL delete function
+// POST /urls/:shortURL/delete - URL delete function
 app.post("/urls/:shortURL/delete", (req, res) => {
   if (!req.session.user_id) {
     return res.status(401).send('Unauthorized Request. Please log in.');  // Return unauthorized request if user is not logged in
@@ -190,6 +190,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
   res.redirect("/urls/");
 })
 
+// Listen
 app.listen(PORT, () => {
   console.log(`Tiny App listening on port ${PORT}!`);
 });
