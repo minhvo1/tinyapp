@@ -2,7 +2,7 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const cookieSession = require("cookie-session");
 const bcrypt = require('bcryptjs');
-const { getUserByEmail, checkEmail, generateRandomString, urlsForUser, checkLoginCookies } = require('./helpers'); // Import helper functions
+const { getUserByEmail, checkEmail, generateRandomString, urlsForUser } = require('./helpers'); // Import helper functions
 const app = express();
 const PORT = 8080; // Default port 8080
 
@@ -49,6 +49,9 @@ app.use(cookieSession({
 
 // Landing page redirecting to /urls
 app.get("/", (req, res) => {
+  if (!req.session.user_id) {
+    return res.redirect('/login');
+  }
   res.redirect("/urls");
 });
 
@@ -79,13 +82,13 @@ app.post("/login", (req, res) => {
 // Logout; clears cookies
 app.post("/logout", (req, res) => {
   req.session = null;
-  res.redirect('/urls');
+  res.redirect('/');
 })
 
 // Page for all current URLs in data base
 app.get("/urls", (req, res) => {
   if (!req.session.user_id) {
-    return res.redirect('/login');
+    return res.status(401).send('Unauthorized Request. Please log in.');  // Return unauthorized request if user is not logged in
   }
   const templateVars = { user: users[req.session.user_id],urls: urlDatabase };
   res.render("urls_index", templateVars);
@@ -93,7 +96,9 @@ app.get("/urls", (req, res) => {
 
 // Generate random short URL strings after submitting a long URL
 app.post("/urls", (req, res) => {
-  checkLoginCookies(req.session.user_id, res);
+  if (!req.session.user_id) {
+    return res.status(401).send('Unauthorized Request. Please log in.');  // Return unauthorized request if user is not logged in
+  }
   const shortURL = generateRandomString();
   urlDatabase[shortURL] = {};
   urlDatabase[shortURL].longURL = req.body.longURL; // Set the long URL input from form to the corresponding short URL generate in database
@@ -130,7 +135,9 @@ app.post("/register", (req, res) => {
 
 // Add a new long URL to be shortened
 app.get("/urls/new", (req, res) => {
-  checkLoginCookies(req.session.user_id, res);
+  if (!req.session.user_id) {
+    return res.status(401).send('Unauthorized Request. Please log in.');  // Return unauthorized request if user is not logged in
+  }
   const templateVars = { user: users[req.session.user_id] };
   res.render("urls_new", templateVars);
 });
@@ -154,24 +161,31 @@ app.post("/u/:shortURL", (req, res) => {
 
 // Showing individual URL and edit function
 app.get("/urls/:shortURL", (req, res) => {
-  checkLoginCookies(req.session.user_id, res);
+  if (!req.session.user_id) {
+    return res.status(401).send('Unauthorized Request. Please log in.');  // Return unauthorized request if user is not logged in
+  }
+  req.session.views = (req.session.views || 0) + 1
   let validURLs = urlsForUser(req.session.user_id, urlDatabase);
   if (!validURLs.includes(req.params.shortURL)) {
     return res.status(401).send('The requested URL does not exist.'); // Error if the requested URL does not exist for user
   }
-  const templateVars = { user: users[req.session.user_id], shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL].longURL };
+  const templateVars = { user: users[req.session.user_id], shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL].longURL, viewCount: req.session.views };
   res.render("urls_show", templateVars);
 });
 
 // URL edit function
 app.post("/urls/:shortURL/edit", (req, res) => {
-  checkLoginCookies(req.session.user_id, res);
+  if (!req.session.user_id) {
+    return res.status(401).send('Unauthorized Request. Please log in.');  // Return unauthorized request if user is not logged in
+  }
   res.redirect(`/urls/${req.params.shortURL}`);
 })
 
 // URL delete function
 app.post("/urls/:shortURL/delete", (req, res) => {
-  checkLoginCookies(req.session.user_id, res);
+  if (!req.session.user_id) {
+    return res.status(401).send('Unauthorized Request. Please log in.');  // Return unauthorized request if user is not logged in
+  }
   delete urlDatabase[req.params.shortURL];
   res.redirect("/urls/");
 })

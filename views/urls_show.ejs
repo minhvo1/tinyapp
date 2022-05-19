@@ -12,7 +12,7 @@
       <div class="card-header"></div>
       <div class="card-body">
         <h5 class="card-title">TinyURL for: <%= longURL %></h5>
-        <p class="card-text">Short URL: <a href="/u/<%= shortURL %>"><%= shortURL %></a></p>
+        <p class="card-text">Short URL: <a href="/u/<%= shortURL %>"><%= shortURL %></a> - <%= viewCount %> view(s)</p>
         <div class="p-3 mb-2 bg-light border">
           <form method="POST" action="/u/<%= shortURL %>">
             <h2 class="card-subtitle mb-2 text-secondary">Edit </h2>

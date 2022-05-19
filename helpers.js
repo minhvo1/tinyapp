@@ -40,11 +40,4 @@ const urlsForUser = function(id, userDatabase) {
   return urls;
 };
 
-// Function to check user ID cookies to verify whether user logged in
-const checkLoginCookies = function(cookie, res) {
-  if (!cookie) {
-   return res.status(401).send('Unauthorized Request. Please log in.');  // Return unauthorized request if user is not logged in
-  }
- };
-
-module.exports = {getUserByEmail, checkEmail, generateRandomString, urlsForUser, checkLoginCookies};
+module.exports = {getUserByEmail, checkEmail, generateRandomString, urlsForUser};
