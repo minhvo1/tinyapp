@@ -4,13 +4,13 @@ TinyApp is a full stack web application built with Node and Express that allows 
 
 ## Final Product
 
-![User login](https://user-images.githubusercontent.com/62153327/169414159-20c6854d-4b6e-424f-ba3a-348de422197c.png)
+![User login](https://github.com/minhvo1/tinyapp/blob/master/docs/login-page.png?raw=true)
 
 
-![Collection of a user's shortened URLs](https://user-images.githubusercontent.com/62153327/169415299-54587eeb-0d13-45b7-a935-b141812e0f66.png)
+![Collection of a user's shortened URLs](https://github.com/minhvo1/tinyapp/blob/master/docs/urls-page.png?raw=true)
 
 
-![Shortened URL information and edit](https://user-images.githubusercontent.com/62153327/169415181-9d0a555d-8676-4f4e-8680-9fe6c967a3b8.png)
+![Shortened URL information and edit](https://github.com/minhvo1/tinyapp/blob/master/docs/urls-edit-page.png?raw=true)
 
 
 ## Dependencies
