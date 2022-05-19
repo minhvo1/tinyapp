@@ -182,14 +182,22 @@ app.get("/urls/:shortURL", (req, res) => {
 });
 
 app.post("/urls/:shortURL/edit", (req, res) => {
+  if (!req.cookies["user_id"]) {
+    res.status(401).send('Unauthorized Request.');
+    return;
+  }
   res.redirect(`/urls/${req.params.shortURL}`);
 })
 
 app.post("/urls/:shortURL/delete", (req, res) => {
+  if (!req.cookies["user_id"]) {
+    res.status(401).send('Unauthorized Request.');
+    return;
+  }
   delete urlDatabase[req.params.shortURL];
   res.redirect("/urls/");
 })
 
 app.listen(PORT, () => {
-  console.log(`Example app listening on port ${PORT}!`);
+  console.log(`Tiny App listening on port ${PORT}!`);
 });
