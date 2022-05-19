@@ -40,13 +40,17 @@ function checkEmail(email, userDatabase) {
 }
 
 
-app.set('view engine', 'ejs');
+function urlsForUser(id, userDatabase) {
+  let urls = [];
+  for (const shortURL in userDatabase) {
+    if (id === userDatabase[shortURL].userID) {
+      urls.push(shortURL)
+    }
+  }
+  return urls;
+}
 
-// Old URL Database
-// const urlDatabase = {
-//   "b2xVn2": "http://www.lighthouselabs.ca",
-//   "9sm5xK": "http://www.google.com"
-// };
+app.set('view engine', 'ejs');
 
 // New URL Database
 const urlDatabase = {
@@ -166,6 +170,13 @@ app.post("/u/:shortURL", (req, res) => {
 });
 
 app.get("/urls/:shortURL", (req, res) => {
+  if (!req.cookies["user_id"]) {
+    return res.status(401).send('Unauthorized Request. Please log in.');
+  }
+  let validURLs = urlsForUser(req.cookies["user_id"], urlDatabase);
+  if (!validURLs.includes(req.params.shortURL)) {
+    return res.status(401).send('You do not have access to the requested URL.');
+  }
   const templateVars = { user: users[req.cookies["user_id"]], shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL].longURL };
   res.render("urls_show", templateVars);
 });
