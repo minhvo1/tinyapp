@@ -5,7 +5,7 @@ const getUserByEmail = function(email, database) {
       return database[id].id; //return id email matches
     }
   }
-  return null; // if not found return null
+  return undefined; // if not found return undefined;
 };
 
 // Check to verify if email address is already registered

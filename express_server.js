@@ -2,7 +2,7 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const cookieSession = require("cookie-session");
 const bcrypt = require('bcryptjs');
-const { getUserByEmail, checkEmail, generateRandomString, urlsForUser, checkLoginCookies } = require('./helper'); // Import helper functions
+const { getUserByEmail, checkEmail, generateRandomString, urlsForUser, checkLoginCookies } = require('./helpers'); // Import helper functions
 const app = express();
 const PORT = 8080; // Default port 8080
 
