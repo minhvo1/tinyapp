@@ -22,7 +22,7 @@
         <button type="submit" class="btn btn-primary">Register</button>
       </form>
     <% } else { %>
-      <div class="nav-item positon-relative" style="width: 180px">Logged in as <%= user.email %> </div>
+      <div class="navbar" style="width: auto; font-size: 0.9em;">Logged in as <%= user.email %> </div>
       <form method="POST" action="/logout">
         <button type="submit" class="btn btn-primary">Logout</button>
       </form>
