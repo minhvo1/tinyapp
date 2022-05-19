@@ -136,7 +136,7 @@ app.post("/register", (req, res) => {
 // Add a new long URL to be shortened
 app.get("/urls/new", (req, res) => {
   if (!req.session.user_id) {
-    return res.status(401).send('Unauthorized Request. Please log in.');  // Return unauthorized request if user is not logged in
+    return res.redirect("/login");
   }
   const templateVars = { user: users[req.session.user_id] };
   res.render("urls_new", templateVars);
@@ -164,7 +164,7 @@ app.get("/urls/:shortURL", (req, res) => {
   if (!req.session.user_id) {
     return res.status(401).send('Unauthorized Request. Please log in.');  // Return unauthorized request if user is not logged in
   }
-  req.session.views = (req.session.views || 0) + 1
+  req.session.views = (req.session.views || 0) + 1;
   let validURLs = urlsForUser(req.session.user_id, urlDatabase);
   if (!validURLs.includes(req.params.shortURL)) {
     return res.status(401).send('The requested URL does not exist.'); // Error if the requested URL does not exist for user
