@@ -9,7 +9,7 @@ const users = {
   "userRandomID": {
     id: "userRandomID", 
     email: "user@example.com", 
-    password: "purple-monkey-dinosaur"
+    password: "1"
   },
  "user2RandomID": {
     id: "user2RandomID", 
@@ -100,6 +100,7 @@ app.post("/logout", (req, res) => {
 
 // Page for all current URLs in data base
 app.get("/urls", (req, res) => {
+  //console.log(users[req.cookies["user_id"]],urlDatabase)
   const templateVars = { user: users[req.cookies["user_id"]],urls: urlDatabase };
   res.render("urls_index", templateVars);
 });
