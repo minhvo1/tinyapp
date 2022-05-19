@@ -1,6 +1,7 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser")
+const bcrypt = require('bcryptjs');
 const app = express();
 const PORT = 8080; // Default port 8080
 
@@ -17,6 +18,11 @@ const users = {
     password: "dishwasher-funk"
   }
 };
+
+// Hash all current passwords in existing database
+for (const user in users) {
+  users[user].password = bcrypt.hashSync(users[user].password, 10)
+}
 
 // New URL Database
 const urlDatabase = {
@@ -48,7 +54,7 @@ function checkEmail(email, userDatabase) {
       return true; //return true if email already in database
     }
   }
-  return false 
+  return false;
 }
 
 // Function to return URLs from database that belongs to a user
@@ -87,7 +93,8 @@ app.post("/login", (req, res) => {
   for (const id in users) {
     if (users[id].email === req.body.email) {
       userID = id;
-      if (users[id].password !== req.body.password) {
+      console.log(req.body.password, users[id].password)
+      if (!bcrypt.compareSync(req.body.password, users[id].password)) {
         return res.status(403).send("Email address and password do not match.");
       }
     }
@@ -137,12 +144,12 @@ app.post("/register", (req, res) => {
   }
   // Generates random userID string
   const userID = generateRandomString();
-  
+  const hashedPassword = bcrypt.hashSync(req.body.password, 10);
   // Add new user info to database
   users[userID] = {
     'id': userID,
     'email': req.body.email,
-    'password': req.body.password
+    'password': hashedPassword
   };
   res.cookie("user_id", userID);
   res.redirect("/urls");
@@ -185,6 +192,7 @@ app.get("/urls/:shortURL", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
+// URL edit function
 app.post("/urls/:shortURL/edit", (req, res) => {
   if (!req.cookies["user_id"]) {
     res.status(401).send('Unauthorized Request. Please log in.');
@@ -193,6 +201,7 @@ app.post("/urls/:shortURL/edit", (req, res) => {
   res.redirect(`/urls/${req.params.shortURL}`);
 })
 
+// URL delete function
 app.post("/urls/:shortURL/delete", (req, res) => {
   if (!req.cookies["user_id"]) {
     res.status(401).send('Unauthorized Request.');
